@@ -1,0 +1,31 @@
+body {
+    background-color: powderblue;
+}
+#header {
+    background-color: pink;
+    padding: 2rem;
+    text-align: center;
+}
+#input-area, #output-area {
+    border: 2px solid black;
+    padding: 1rem;
+    margin: 1rem auto;
+    background-color: #ffffff80;
+}
+#input-area {
+    min-height: 200px;
+}
+#output-area .map-row {
+    display: flex;
+    margin-bottom: 1rem;
+}
+#output-area .thumbnail {
+    width: 100px;
+    height: 100px;
+    border: 1px solid black;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+#output-area .metadata {
+    flex-grow: 1;
+}
