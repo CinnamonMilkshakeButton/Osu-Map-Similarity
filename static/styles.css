@@ -29,3 +29,34 @@ body {
 #output-area .metadata {
     flex-grow: 1;
 }
+
+
+
+.param-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap; /* allow items to wrap to new line if needed */
+    margin-bottom: -16px;
+    padding: 4px 0; /* reduce vertical padding */
+    border-bottom: 1px solid #ddd;
+}
+
+
+.param-name {
+    width: 180px;
+    font-weight: bold;
+}
+
+.value-box {
+    width: 80px !important;
+    margin-right: 20px;
+}
+
+.weight-slider {
+    width: 200px;
+    margin-right: 10px;
+}
+
+.weight-number {
+    width: 80px !important;
+}
