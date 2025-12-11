@@ -41,15 +41,22 @@ body {
     border-bottom: 1px solid #ddd;
 }
 
-
 .param-name {
     width: 180px;
     font-weight: bold;
 }
 
 .value-box {
-    width: 80px !important;
+    width: 100px !important;
     margin-right: 20px;
+    -moz-appearance: textfield; /* Hide spinners for firefox */
+}
+
+/* Hide spinners for chromelike */
+.value-box::-webkit-inner-spin-button,
+.value-box::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .weight-slider {

@@ -12,8 +12,10 @@ const NAMES = [
     "Circle Count", "Slider Count", "Spinner Count", "Max Combo"
 ];
 
-/* Create an input section */
-function createRow(id, name) { /*2 Entries a row above 1400px*/
+URL = "http://localhost:8000"
+
+/* Create an input section. */
+function createRow(id, name) { /* 2 Entries a row above 1400px. */
     return `
         <div class="col-12 col-xxl-6">
             <div class="param-row">
@@ -31,7 +33,7 @@ function createRow(id, name) { /*2 Entries a row above 1400px*/
     `;
 }
 
-/* Create an input section for each feature column*/
+/* Create an input section for each feature column. */
 function buildUI() {
     const container = document.getElementById("parameter-container");
     for(let i = 0; i < FEATURE_COLS.length; i++) {
@@ -44,11 +46,43 @@ function buildUI() {
         const slider = document.getElementById(`weight-${col}`);
         const box = document.getElementById(`weight-${col}-num`);
 
-        /*Sync box and slider values*/
+        /*Sync box and slider values. */
         slider.addEventListener("input", () => box.value = slider.value);
         box.addEventListener("input", () => slider.value = box.value);
 
     }
 }
 
-document.addEventListener("DOMContentLoaded", buildUI);
+function loadBeatmapStats() {
+    document.getElementById("load-btn").addEventListener("click", async (e) => {
+
+        /* Get the users value which should equate to a beatmap ID. */
+        const beatmapID = document.getElementById("load-map-id").value;
+
+        if (!beatmapID) return;
+
+        try {
+            const result = await fetch(`${URL}/map/${beatmapID}`);
+            if (!result.ok)
+                throw new Error("Beatmap not found.")
+            const data = await result.json();
+            console.log(data)
+
+            FEATURE_COLS.forEach(col => {
+                const stat = document.getElementById(`stat-${col}`);
+                if (stat) stat.value = data[col] ?? 0;
+            });
+            
+        } catch (error) {
+            console.error(error);
+            alert("Error fetching beatmap data.");
+        }
+    });
+}
+
+/* Run these functions after DOMContentLoaded event. */
+document.addEventListener("DOMContentLoaded", async (e) => {
+    buildUI();
+    loadBeatmapStats();
+});
+

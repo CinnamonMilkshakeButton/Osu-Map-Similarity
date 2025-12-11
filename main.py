@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
+from fastapi.middleware.cors import CORSMiddleware
 
 CSV_PATH = "beatmaps.csv"
 df = pd.read_csv(CSV_PATH)
@@ -28,7 +29,8 @@ for col in FEATURE_COLS:
 
 # Scale all values between 0 and 1
 scaler = MinMaxScaler()
-df[FEATURE_COLS] = scaler.fit_transform(df[FEATURE_COLS])
+normalised_df = df.copy()
+normalised_df = scaler.fit_transform(df[FEATURE_COLS])
 
 
 def weighted_similarity(vector1, vector2, weights):
@@ -59,6 +61,14 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # allow all origins; for production, replace "*" with your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def home(request: Request):
