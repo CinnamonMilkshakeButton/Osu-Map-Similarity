@@ -31,6 +31,11 @@ body {
 }
 
 
+#submit {
+    padding: 2rem;
+    text-align: center;
+}
+
 
 .param-row {
     display: flex;

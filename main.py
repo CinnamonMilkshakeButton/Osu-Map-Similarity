@@ -86,31 +86,43 @@ def get_map(beatmap_id: int):
     return result
 
 @app.post("/similarity")
-def similarity(
-    payload: dict = Body(...)
-):
+def similarity(payload: dict = Body(...)):
     beatmap_id = payload.get("beatmap_id")
     stats = payload.get("stats")
     weights = payload.get("weights")
     top_n = payload.get("top_n", 10)
 
+    # Get query vector
     query_vector = get_vector(beatmap_id, stats)
+
+    # Default weights = 1
     if not weights:
         weights = {col: 1 for col in FEATURE_COLS}
+
     weight_array = np.array([weights.get(col, 1) for col in FEATURE_COLS], dtype=float)
 
     similarities = []
+
     for idx, row in df.iterrows():
         sim = weighted_similarity(query_vector, row[FEATURE_COLS].values, weight_array)
-        similarities.append((row["beatmap_id"], sim, row["title"]))
+        similarities.append((sim, row))
 
-    similarities.sort(key=lambda x: x[1], reverse=True)
-    top_results = similarities[:top_n]
-    # Sanitize results
+    # Sort descending by similarity
+    similarities.sort(key=lambda x: x[0], reverse=True)
+
+    # Select top N
     sanitized = []
-    for b, s, t in top_results:
-        if np.isnan(s) or np.isinf(s):
-            s = 0.0
-        sanitized.append({"beatmap_id": b, "title": t, "similarity": s})
+    for sim, row in similarities[:top_n]:
+
+        row_dict = row.to_dict()
+
+        # Clean invalid floats
+        for k, v in row_dict.items():
+            if isinstance(v, float) and (np.isnan(v) or np.isinf(v)):
+                row_dict[k] = 0.0
+
+        row_dict["similarity"] = sim
+
+        sanitized.append(row_dict)
 
     return sanitized

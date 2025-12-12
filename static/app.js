@@ -54,6 +54,7 @@ function buildUI() {
 }
 
 function loadBeatmapStats() {
+    /* When the user presses the load button, run the function below to load values from backend. */
     document.getElementById("load-btn").addEventListener("click", async (e) => {
 
         /* Get the users value which should equate to a beatmap ID. */
@@ -63,8 +64,9 @@ function loadBeatmapStats() {
 
         try {
             const result = await fetch(`${URL}/map/${beatmapID}`);
-            if (!result.ok)
+            if (!result.ok) {
                 throw new Error("Beatmap not found.")
+            }
             const data = await result.json();
             console.log(data)
 
@@ -80,9 +82,59 @@ function loadBeatmapStats() {
     });
 }
 
+function loadOutputMaps() {
+    document.getElementById("submit-btn").addEventListener("click", async (e) => {
+        /* Close settings panel */
+        document.querySelector("details").open = false;
+        /* Collect stats */
+        const stats = {};
+        for (const col of FEATURE_COLS) {
+            const element = document.getElementById(`stat-${col}`);
+            stats[col] = parseFloat(element.value) || 0;
+        }
+
+        /* Collect weights */
+        const weights = {};
+        for (const col of FEATURE_COLS) {
+            const element = document.getElementById(`weight-${col}`);
+            weights[col] = parseFloat(element.value) || 0;
+        }
+
+        const payload = {
+            beatmap_id: null,
+            stats: stats,
+            weights: weights,
+            top_n: 10
+        };
+
+        try {
+            const response = await fetch(`${URL}/similarity`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if(!response.ok) {
+                throw new Error("Request failed.")
+            }
+
+            const data = await response.json();
+
+            console.log(data);
+
+        } catch (error) {
+            console.error(error);
+            alert("Error fetching beatmap data.");
+        }
+
+    });
+}
+
 /* Run these functions after DOMContentLoaded event. */
 document.addEventListener("DOMContentLoaded", async (e) => {
     buildUI();
     loadBeatmapStats();
+    loadOutputMaps();
 });
-

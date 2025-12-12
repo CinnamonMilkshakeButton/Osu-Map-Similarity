@@ -17,8 +17,15 @@
     </div>
     <!--Use js to load parameter stuff-->
     <div class="container mt-4">
-        <h3>Beatmap Settings</h3>
-        <div id="parameter-container" class="row g-3"></div>
+        <details open>
+            <summary style="font-size: 1.25rem; cursor: pointer;">
+                Beatmap Settings
+            </summary>
+            <div id="parameter-container" class="row g-3"></div>
+        </details>
+    </div>
+    <div id="submit">
+        <button class="btn btn-primary mt-2" id="submit-btn">Submit</button>
     </div>
 </body>
 </html>
