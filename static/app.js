@@ -84,8 +84,10 @@ function loadBeatmapStats() {
 
 function loadOutputMaps() {
     document.getElementById("submit-btn").addEventListener("click", async (e) => {
+
         /* Close settings panel */
         document.querySelector("details").open = false;
+
         /* Collect stats */
         const stats = {};
         for (const col of FEATURE_COLS) {
@@ -100,6 +102,8 @@ function loadOutputMaps() {
             weights[col] = parseFloat(element.value) || 0;
         }
 
+        /* Beatmap id depriciated to be removed when I get round to optimising backend function. */
+        /* Top n to be changable by the user eventually. */
         const payload = {
             beatmap_id: null,
             stats: stats,
@@ -107,6 +111,7 @@ function loadOutputMaps() {
             top_n: 10
         };
 
+        /* Send request and receive response. */
         try {
             const response = await fetch(`${URL}/similarity`, {
                 method: "POST",
@@ -122,15 +127,65 @@ function loadOutputMaps() {
 
             const data = await response.json();
 
-            console.log(data);
+            renderBeatmapResults(data);
 
         } catch (error) {
             console.error(error);
-            alert("Error fetching beatmap data.");
+            alert("Error fetching beatmap data. Make sure you are searching for a valid beatmap id.");
         }
-
     });
 }
+
+function renderBeatmapResults(results) {
+    const container = document.getElementById("results-container")
+    container.innerHTML = ""; /* Reset container contents */
+
+    results.forEach(map => {
+        const {
+            beatmap_id,
+            title,
+            artist,
+            similarity,
+            bpm,
+            difficultyrating,
+            diff_aim,
+            diff_speed,
+        } = map;
+
+        const statsHTML = Object.entries(map)
+            .filter(([key, value]) => FEATURE_COLS.includes(key))
+            .map(([key, value]) => `<span><strong>${key.replace(/_/g, " ")}:</strong> ${value}</span>`)
+            .join("");
+
+        const cardHTML = `
+            <a href="https://osu.ppy.sh/beatmapsets/${beatmap_id}" 
+                target="_blank" 
+                style="text-decoration: none; color: inherit;">
+            
+                <div class="result-card">
+
+                    <div class="result-thumb"></div>
+
+                    <div class="result-info">
+                        <div class="result-title">${title || "Unknown Title"}</div>
+                        
+                        <div class="result-stats">
+                            ${statsHTML}
+                        </div>
+
+                        <div class="text-muted mt-1">
+                            Similarity: ${(similarity * 100).toFixed(1)}%
+                        </div>
+                    </div>
+
+                </div>
+            </a>
+        `;
+
+        container.insertAdjacentHTML("beforeend", cardHTML)
+
+    });
+};
 
 /* Run these functions after DOMContentLoaded event. */
 document.addEventListener("DOMContentLoaded", async (e) => {

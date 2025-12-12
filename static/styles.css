@@ -72,3 +72,48 @@ body {
 .weight-number {
     width: 80px !important;
 }
+
+
+/* Results container */
+.result-card {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.result-card:hover {
+    background: #f7f7f7;
+}
+
+.result-thumb {
+    width: 90px;
+    height: 70px;
+    background-color: #ccc; /* placeholder */
+    border-radius: 6px;
+    margin-right: 16px;
+    flex-shrink: 0;
+}
+
+.result-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.result-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+}
+
+.result-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.9rem;
+}
