@@ -1,13 +1,13 @@
 const FEATURE_COLS = [
     "bpm", "difficultyrating", "diff_aim", "diff_speed", "diff_size",
-    "diff_overall", "diff_approach", "diff_drain", "hit_length",
+    "diff_overall", "diff_approach", "diff_drain", "hit_length", "favourite_count",
     "total_length", "rating", "playcount", "passcount",
     "count_normal", "count_slider", "count_spinner", "max_combo"
 ];
 
 const NAMES = [
     "BPM", "Difficulty Rating", "Aim Difficulty", "Speed Difficulty", "Diff size",
-    "OD", "AR", "Diff drain", "Hit Length",
+    "OD", "AR", "Diff drain", "Hit Length", "Favourite Count",
     "Total Length", "Rating", "Playcount", "Passcount",
     "Circle Count", "Slider Count", "Spinner Count", "Max Combo"
 ];
@@ -140,6 +140,7 @@ function renderBeatmapResults(results) {
 
     results.forEach(map => {
         const {
+            beatmapset_id,
             beatmap_id,
             title,
             artist,
@@ -147,7 +148,7 @@ function renderBeatmapResults(results) {
             bpm,
             difficultyrating,
             diff_aim,
-            diff_speed,
+            diff_speed
         } = map;
 
         const statsHTML = Object.entries(map)
@@ -156,7 +157,7 @@ function renderBeatmapResults(results) {
             .join("");
 
         const cardHTML = `
-            <a href="https://osu.ppy.sh/beatmapsets/${beatmap_id}" 
+            <a href="https://osu.ppy.sh/beatmapsets/${beatmapset_id}#osu/${beatmap_id}" 
                 target="_blank" 
                 style="text-decoration: none; color: inherit;">
             

@@ -13,9 +13,11 @@ from fastapi.middleware.cors import CORSMiddleware
 CSV_PATH = "beatmaps.csv"
 df = pd.read_csv(CSV_PATH)
 
+# When adding new stat here add it in app.js to FEATURE_COLS and NAME and it should work straight away.
+# Obviously has to exist in beatmaps.csv as well.
 FEATURE_COLS = [
     "bpm", "difficultyrating", "diff_aim", "diff_speed", "diff_size", 
-    "diff_overall", "diff_approach", "diff_drain", "hit_length", 
+    "diff_overall", "diff_approach", "diff_drain", "hit_length", "favourite_count",
     "total_length", "rating", "playcount", "passcount", 
     "count_normal", "count_slider", "count_spinner", "max_combo"
 ]
