@@ -22,16 +22,17 @@ FEATURE_COLS = [
 
 df[FEATURE_COLS] = df[FEATURE_COLS].apply(pd.to_numeric, errors="coerce").fillna(0)
 
+normalised_df = df.copy()
+
 # Fix constant columns (MinMaxScaler cannot handle them)
 for col in FEATURE_COLS:
-    if df[col].nunique() <= 1:
-        df[col] = 0.0
+    if normalised_df[col].nunique() <= 1:
+        normalised_df[col] = 0.0
 
 # Scale all values between 0 and 1
 scaler = MinMaxScaler()
-normalised_df = df.copy()
-normalised_df = scaler.fit_transform(df[FEATURE_COLS])
 
+normalised_df[FEATURE_COLS] = scaler.fit_transform(normalised_df[FEATURE_COLS])
 
 def weighted_similarity(vector1, vector2, weights):
     vector1 = np.array(vector1)
@@ -43,17 +44,11 @@ def weighted_similarity(vector1, vector2, weights):
     similarity = 1 / (1 + dist)
     return similarity
 
-def get_vector(beatmap_id: Optional[int] = None, stats: Optional[Dict] = None):
-    if beatmap_id is not None:
-        row = df[df["beatmap_id"] == beatmap_id]
-        if row.empty:
-            raise HTTPException(status_code=404, detail="Beatmap ID not found")
-        vector = row.iloc[0][FEATURE_COLS].values.astype(float)
-    elif stats:
-        vector = np.array([stats.get(col, 0) for col in FEATURE_COLS], dtype=float)
-    else:
-        raise HTTPException(status_code=400, detail="Please provide stats or a beatmap id")
-    return vector
+def get_vector(stats: Dict):
+    stats_vector = np.array([stats.get(col, 0) for col in FEATURE_COLS], dtype=float)
+    tmp = pd.DataFrame([stats_vector], columns=FEATURE_COLS)
+    tmp_scaled = scaler.transform(tmp)
+    return tmp_scaled[0]
 
 app = FastAPI()
 
@@ -87,42 +82,49 @@ def get_map(beatmap_id: int):
 
 @app.post("/similarity")
 def similarity(payload: dict = Body(...)):
-    beatmap_id = payload.get("beatmap_id")
+    # Extract fields from request
     stats = payload.get("stats")
     weights = payload.get("weights")
     top_n = payload.get("top_n", 10)
 
-    # Get query vector
-    query_vector = get_vector(beatmap_id, stats)
+    if stats is None:
+        raise HTTPException(status_code=400, detail="You must provide stats")
 
-    # Default weights = 1
+    # Normalize query stats
+    stats_vector = np.array([stats.get(col, 0) for col in FEATURE_COLS], dtype=float)
+    tmp = pd.DataFrame([stats_vector], columns=FEATURE_COLS)
+    query_vector = scaler.transform(tmp)[0]
+
+    # Prepare weights array
     if not weights:
         weights = {col: 1 for col in FEATURE_COLS}
-
     weight_array = np.array([weights.get(col, 1) for col in FEATURE_COLS], dtype=float)
 
+    # Compute similarities for each beatmap
     similarities = []
+    for idx in range(len(normalised_df)):
+        normalised_row = normalised_df.iloc[idx][FEATURE_COLS].values
+        raw_row = df.iloc[idx]
+        # Compute similarity
+        sim = weighted_similarity(query_vector, normalised_row, weight_array)
+        # Append similarity and raw data (raw data needs to be what is served to the user)
+        similarities.append((sim, raw_row))
 
-    for idx, row in df.iterrows():
-        sim = weighted_similarity(query_vector, row[FEATURE_COLS].values, weight_array)
-        similarities.append((sim, row))
-
-    # Sort descending by similarity
+    # Sort by similarity
     similarities.sort(key=lambda x: x[0], reverse=True)
 
-    # Select top N
-    sanitized = []
-    for sim, row in similarities[:top_n]:
-
-        row_dict = row.to_dict()
-
-        # Clean invalid floats
+    # Build sanitized output
+    output = []
+    for sim, raw_row in similarities[:top_n]:
+        # Convert to dictionary
+        row_dict = raw_row.to_dict()
+        # Replace NaN or Inf with 0.0 so we don't break the JSON
         for k, v in row_dict.items():
             if isinstance(v, float) and (np.isnan(v) or np.isinf(v)):
                 row_dict[k] = 0.0
+        # Add similarity score
+        row_dict["similarity"] = float(sim)
+        # Add to output list
+        output.append(row_dict)
 
-        row_dict["similarity"] = sim
-
-        sanitized.append(row_dict)
-
-    return sanitized
+    return output

@@ -102,10 +102,8 @@ function loadOutputMaps() {
             weights[col] = parseFloat(element.value) || 0;
         }
 
-        /* Beatmap id depriciated to be removed when I get round to optimising backend function. */
         /* Top n to be changable by the user eventually. */
         const payload = {
-            beatmap_id: null,
             stats: stats,
             weights: weights,
             top_n: 10
@@ -131,7 +129,7 @@ function loadOutputMaps() {
 
         } catch (error) {
             console.error(error);
-            alert("Error fetching beatmap data. Make sure you are searching for a valid beatmap id.");
+            alert("Error fetching beatmap data.");
         }
     });
 }
