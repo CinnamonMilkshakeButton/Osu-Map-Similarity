@@ -1,6 +1,7 @@
 import csv
 import pandas as pd
 import numpy as np
+import time
 from sklearn.preprocessing import MinMaxScaler
 from fastapi import FastAPI, HTTPException, Body
 from typing import Optional, Dict
@@ -12,6 +13,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 CSV_PATH = "beatmaps.csv"
 df = pd.read_csv(CSV_PATH)
+df = df[df['mode'] == 0]
+df = df[df['approved_date'].str[:4] == '2007'] # Debug setting for limiting the number of maps
+
+print(f"Loaded {len(df)} maps.")
 
 # When adding new stat here add it in app.js to FEATURE_COLS and NAME and it should work straight away.
 # Obviously has to exist in beatmaps.csv as well.
@@ -84,10 +89,11 @@ def get_map(beatmap_id: int):
 
 @app.post("/similarity")
 def similarity(payload: dict = Body(...)):
+    start = time.time()
     # Extract fields from request
     stats = payload.get("stats")
     weights = payload.get("weights")
-    top_n = payload.get("top_n", 10)
+    top_n = payload.get("top_n", 25)
 
     if stats is None:
         raise HTTPException(status_code=400, detail="You must provide stats")
@@ -129,4 +135,9 @@ def similarity(payload: dict = Body(...)):
         # Add to output list
         output.append(row_dict)
 
+    print(f"Processed request in {time.time() - start:4f} seconds.")
+
     return output
+
+# todo
+# Handle outlier data such as sr 1000 loved maps

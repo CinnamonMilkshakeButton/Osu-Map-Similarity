@@ -106,7 +106,7 @@ function loadOutputMaps() {
         const payload = {
             stats: stats,
             weights: weights,
-            top_n: 10
+            top_n: 25
         };
 
         /* Send request and receive response. */
@@ -163,7 +163,7 @@ function renderBeatmapResults(results) {
             
                 <div class="result-card">
 
-                    <div class="result-thumb"></div>
+                    <img class="result-thumb" src="https://b.ppy.sh/thumb/${beatmapset_id}l.jpg" alt="No thumbnail :(" />
 
                     <div class="result-info">
                         <div class="result-title">${title || "Unknown Title"}</div>

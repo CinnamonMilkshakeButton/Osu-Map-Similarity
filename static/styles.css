@@ -117,3 +117,19 @@ body {
     gap: 8px;
     font-size: 0.9rem;
 }
+
+
+/* Image thumbnail stuff */
+.result-thumb {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+.result-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+}
